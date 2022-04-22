@@ -1,0 +1,163 @@
+<canvas width="600" height="400"> </canvas>
+
+<script>
+
+	var tela = document.querySelector('canvas');
+	var pincel = tela.getContext('2d');
+
+	function desenhaQuadro() {
+		pincel.fillStyle = 'black';
+		pincel.fillRect(0, 0, 600, 400);
+		pincel.fillStyle = 'white';
+		pincel.fillRect(297, 0, 3, 400)
+	}
+
+	//Bolinha, movimento e física
+	var xBolinha = 300 - tela.offsetLeft;
+	var yBolinha = 200 - tela.offsetTop;
+	var raio = 10
+	var velocidadeXBolinha = 5;
+	var velocidadeYBolinha = 5;
+
+	function bolinha() {
+		pincel.fillStyle = 'white';
+		pincel.beginPath();
+		pincel.arc(xBolinha, yBolinha, raio, 0, 2 * 3.14);
+		pincel.fill();
+
+		xBolinha += velocidadeXBolinha;
+		yBolinha += velocidadeYBolinha;
+
+		if (xBolinha > 600) {
+			velocidadeXBolinha *= -1;
+		} else if (xBolinha < 0) {
+			velocidadeXBolinha = 6;
+		} else if (yBolinha > 400) {
+			velocidadeYBolinha *= -1;
+		} else if (yBolinha < 0) {
+			velocidadeYBolinha = 6;
+		}
+
+		console.log(xBolinha + ',' + yBolinha);
+	}
+
+	// Raquete do jogador	
+	var cima = 38
+	var baixo = 40
+	var taxa = 20
+	var yRaquete = 150
+	var xRaquete = 5
+
+	function raquete() {
+		pincel.fillStyle = 'white';
+		pincel.fillRect(xRaquete, yRaquete, 5, 100);
+		pincel.fill();
+	}
+	function moveRaquete(evento) {
+		raquete();
+		if (evento.keyCode == baixo) {
+			yRaquete += taxa;
+		} else if (evento.keyCode == cima) {
+			yRaquete -= taxa;
+		}
+	}
+
+	//Raquete rival
+	var yRival = 100;
+	var xRival = 590;
+	var velocidadeYRival;
+
+	function raqueteRival() {
+		pincel.fillStyle = 'white';
+		pincel.fillRect(xRival, yRival, 5, 100);
+		pincel.fill();
+	}
+	var chanceDeErrar = 0;
+	function calculaChanceDeErrar() {
+		if (pontosRival >= meusPontos) {
+			chanceDeErrar += 10
+		}
+		if (chanceDeErrar >= 39) {
+			chanceDeErrar = 40
+		} else {
+			chanceDeErrar -= 1
+		}
+		if (chanceDeErrar <= 35) {
+			chanceDeErrar = 35
+		}
+	}
+	function movimentaRaqueteRival() {
+		velocidadeYRival = yBolinha - yRival - 5 / 2 - 50;
+		yRival += velocidadeYRival + chanceDeErrar;
+		calculaChanceDeErrar()
+	}
+
+	//Colisões
+	function verificaColisaoRaquete() {
+		if (xBolinha - raio < xRaquete + 5 && yBolinha - raio < yRaquete + 100 && yBolinha + raio > yRaquete) {
+			velocidadeXBolinha *= -1;
+		} else if (xBolinha + raio > xRival + 5 && yBolinha + raio < yRival + 100 && yBolinha - raio > yRival) {
+			velocidadeXBolinha *= -1;
+		}
+	}
+	// Placar do jogo
+	var meusPontos = 0;
+	var pontosRival = 0;
+	function placar() {
+		pincel.font = "20px Arial";
+		pincel.fillStyle = 'white';
+		pincel.fillText(meusPontos, 150, 30);
+		pincel.fillText(pontosRival, 450, 30);
+
+		if (xBolinha > 599) {
+			meusPontos += 1;
+		} else if (xBolinha < 0) {
+			pontosRival += 1;
+		}
+	}
+	//Fim de jogo
+
+	resetPoints = false
+	function resetaPlacar() {
+		if (resetPoints == true) {
+			meusPontos = 0
+			pontosRival = 0
+		}
+	}
+	function ganhou() {
+		alert("VOCÊ GANHOU!");
+	}
+	function perdeu() {
+		alert("VOCÊ PERDEU!");
+	}
+
+	function gameOver() {
+		pincel.fillStyle = "grey"
+		if (meusPontos >= 10) {
+			ganhou();
+			resetPoints = true;
+
+		} else if (pontosRival >= 10) {
+			perdeu();
+			resetPoints = true;
+
+		}
+	}
+
+	// Desenhando
+	function desenha() {
+		pincel.clearRect(0, 0, 600, 400);
+		desenhaQuadro();
+		bolinha();
+		raqueteRival();
+		raquete();
+		verificaColisaoRaquete();
+		movimentaRaqueteRival();
+		placar();
+		gameOver();
+		resetaPlacar();
+	}
+	document.onkeydown = moveRaquete;
+	setInterval(desenha, 20);
+
+</script>
